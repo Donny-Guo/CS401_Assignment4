@@ -1,3 +1,5 @@
+import java.util.Scanner;
+
 import javax.swing.*;
 
 /**
@@ -12,6 +14,16 @@ public class DVDGUI implements DVDUserInterface {
 	 public DVDGUI(DVDCollection dl)
 	 {
 		 dvdlist = dl;
+	 }
+	 
+	 public void loadData() {
+		// Request the name of data file
+		String filename = JOptionPane.showInputDialog("Enter data file name: ");
+		this.dvdlist.loadData(filename);
+	 }
+	 
+	 public void showMessage() {
+		 JOptionPane.showMessageDialog(null, "Hello");
 	 }
 	 
 	 public void processCommands()
