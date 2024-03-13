@@ -51,6 +51,26 @@ public class DVDCollection {
 		}
 		return info;
 	}
+	
+	public String listDVDs() {
+		String output = "List of DVDs: \n";
+		for (int i = 0; i < this.numdvds; i++) {
+			output += String.format("%d. %s\n", i + 1, this.dvdArray[i].getTitle());
+		}
+		return output;
+	}
+	
+	public int getTotalNumOfDVDs() {
+		return this.numdvds;
+	}
+	
+	public DVD getDVDByIndex(int index) {
+		return this.dvdArray[index];
+	}
+	
+	public String getFilename() {
+		return this.sourceName;
+	}
 
 	public void addOrModifyDVD(String title, String rating, String runningTime) {
 		// NOTE: Be careful. Running time is a string here
@@ -126,7 +146,7 @@ public class DVDCollection {
 
 	}
 	
-	public void removeDVD(String title) {
+	public boolean removeDVD(String title) {
 		// given a dvd title, remove it from dvdArray if exists
 		
 		// get the index of the dvd the user wants to remove
@@ -142,9 +162,10 @@ public class DVDCollection {
 			this.modified = true;
 			// update numdvds
 			this.numdvds--;
-			
+			return true;
 		} else {
-			System.out.println("DVD not found in the collection. Removal failed.");
+//			System.out.println("DVD not found in the collection. Removal failed.");
+			return false;
 		}
 				
 	}
@@ -220,7 +241,7 @@ public class DVDCollection {
 		
 	}
 	
-	public void save() {
+	public boolean save() {
 		// overwrite the sourceName file with curr collection
 		if (this.modified) {
 			File file = new File(this.sourceName);
@@ -230,13 +251,16 @@ public class DVDCollection {
 					writer.write(this.dvdArray[i].toString());
 				}
 				writer.close();
-				System.out.println("Successfully saved DVD collections to " + this.sourceName + ".");
+//				System.out.println("Successfully saved DVD collections to " + this.sourceName + ".");
+				return true;
 			} catch (IOException ex) {
-				ex.printStackTrace();
+//				ex.printStackTrace();
 			}
-		} else {
-			System.out.println("Saving...No changes needed to save to " + this.sourceName + ".");
-		}
+		} 
+//		else {
+//			System.out.println("Saving...No changes needed to save to " + this.sourceName + ".");
+//		}
+		return false;
 
 	}
 
