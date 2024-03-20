@@ -79,7 +79,7 @@ public class DVDCollection {
 		// double the size of the array first.
 		
 		// sanity check for input :
-		if (!title.equals("") && isCorrectRating(rating) && isCorrectTime(runningTime)) {
+		if (!title.equals("") && isValidRating(rating) && isValidTime(runningTime)) {
 
 			int index = findDVDIndex(title);
 			
@@ -196,9 +196,11 @@ public class DVDCollection {
 	}
 
 	
-	public void loadData(String filename) {
+	public String loadData(String filename) {
 		// if empty: start with empty collections
 		// if corrupted: stop initializing the collection at the point of corruption.
+		
+		String output;
 		
 		// load the file from filename to collections
 		this.sourceName = filename;
@@ -216,14 +218,16 @@ public class DVDCollection {
 							String rating = infoList[1];
 							String runningTime = infoList[2];
 							// sanity check for input :
-							if (!title.equals("") && isCorrectRating(rating) && isCorrectTime(runningTime)) {
+							if (!title.equals("") && isValidRating(rating) && isValidTime(runningTime)) {
 								this.addOrModifyDVD(title, rating, runningTime);
 							} else {
-								System.out.println("Invalid dvd information found in " + this.sourceName + ". Loading Data Stopped.");
+//								System.out.println("Invalid dvd information found in " + this.sourceName + ". Loading Data Stopped.");
+								output = "Invalid dvd information found in " + this.sourceName + ". Loading Data Stopped.";
 								break; // break the while loop
 							}
 						} else { // infoList.length != 3
-							System.out.println("Encountered invalid dvd format in " + this.sourceName + ". Loading Data Stopped.");
+//							System.out.println("Encountered invalid dvd format in " + this.sourceName + ". Loading Data Stopped.");
+							output = "Encountered invalid dvd format in " + this.sourceName + ". Loading Data Stopped.";
 							break; // break the while loop
 						}
 					}
@@ -231,14 +235,17 @@ public class DVDCollection {
 				// set modify status back to false
 				this.modified = false;
 				scanner.close();
+				output = "Successfully loaded data from " + this.sourceName;
 			} else { // if source file does not exist
-				System.out.printf("Failed to load data: %s not found.%n", this.sourceName);
+//				System.out.printf("Failed to load data: %s not found.%n", this.sourceName);
+				output = String.format("Failed to load data: %s not found.%n", this.sourceName);
 			}
 		} catch (IOException ex) {
 			ex.printStackTrace();
+			output = "Fail to load data from " + this.sourceName;
 		}
 		
-		
+		return output;
 	}
 	
 	public boolean save() {
@@ -303,7 +310,7 @@ public class DVDCollection {
 		return index;
 	}
 	
-	private boolean isCorrectRating(String rating) {
+	public boolean isValidRating(String rating) {
 		boolean res = false;
 		// check if rating is in the list of MOVIE_RATINGS
 		for (String s: MOVIE_RATINGS) {
@@ -315,7 +322,7 @@ public class DVDCollection {
 		return res;
 	}
 
-	private boolean isCorrectTime(String time) {
+	public boolean isValidTime(String time) {
 		// try to convert time to integer,
 		// if failed return false, else return true
 		try {

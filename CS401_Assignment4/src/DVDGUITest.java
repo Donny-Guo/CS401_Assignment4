@@ -9,18 +9,30 @@ import java.awt.Image;
 
 public class DVDGUITest implements DVDUserInterface{
 	private DVDCollection dvdlist;
-
+	
 	public DVDGUITest(DVDCollection dl)
 	{
 		dvdlist = dl;
 	}
-
+	
+	
 	public void loadData() {
 		// Request the name of data file
-		String filename = JOptionPane.showInputDialog("Enter data file name: ");
-		this.dvdlist.loadData(filename);
+		String filename;
+		do {
+			
+			filename = JOptionPane.showInputDialog("Enter data file name: ");
+			if (filename == null) {
+				System.exit(0); // dialog is closed and exit the program
+			}
+		
+		} while (filename.equals("")); // continue to prompt user if filename is empty
+		
+		String message = this.dvdlist.loadData(filename);
+		JOptionPane.showMessageDialog(null, message);
 	}
-
+	
+	
 	public void processCommands(){
 
 		String[] commands = {"Add/Modify DVD",
@@ -58,9 +70,11 @@ public class DVDGUITest implements DVDUserInterface{
 			}
 
 		} while (choice != commands.length-1);
-		System.exit(0);
+		System.exit(0); // exit the program
 	}
 
+	
+	
 	private void doRandom() {
 		String[] commands = {"Next",
 		"Back"};
@@ -100,6 +114,8 @@ public class DVDGUITest implements DVDUserInterface{
 		} while (choice != 1);
 	}
 	
+	
+	
 	private void doEditDVD() {
 		String input = "";
 		int num;
@@ -111,19 +127,26 @@ public class DVDGUITest implements DVDUserInterface{
 			if (input == null || input.equals("")) {
 				continue;
 			}
-			num = Integer.parseInt(input);
-			// show warning message if input is invalid
-			if (num <= 0 || num > this.dvdlist.getTotalNumOfDVDs()) {
+			try {
+				num = Integer.parseInt(input);
+				// show warning message if input is invalid
+				if (num <= 0 || num > this.dvdlist.getTotalNumOfDVDs()) {
+					JOptionPane.showMessageDialog(null, "Invalid DVD No. Please try again!", "Warning", JOptionPane.ERROR_MESSAGE);
+				} else {
+					break;
+				}
+			} catch (Exception ex) { // if input is not integer, display error message
 				JOptionPane.showMessageDialog(null, "Invalid DVD No. Please try again!", "Warning", JOptionPane.ERROR_MESSAGE);
-			} else {
-				break;
 			}
+			
 		} 
 		
 		int dvdIndex = num - 1;
 		showDVDDetail(dvdIndex);
 		
 	}
+	
+	
 	
 	private void showDVDDetail(int dvdIndex) {
 		int choice;
@@ -161,20 +184,24 @@ public class DVDGUITest implements DVDUserInterface{
 		}
 	}
 
+	
+	
 	private void modifyDVDRating(int dvdIndex) {
 		String title = this.dvdlist.getDVDByIndex(dvdIndex).getTitle();
 		String rating;
 		String time = Integer.toString(dvdlist.getDVDByIndex(dvdIndex).getRunningTime());
 		// Request the rating
 		while (true) {
-			rating = JOptionPane.showInputDialog("Enter rating for " + title);
+			rating = JOptionPane.showInputDialog("Enter rating for " + title + " (G, PG, PG-13, NC-17 or R):");
 			if (rating == null || rating.equals("")) {
-				continue;		// dialog was cancelled
+				return;		// dialog was cancelled
 			}
 			rating = rating.toUpperCase();
-			break;
+			
 			// check if it's correct rating.
-			// codes here
+			if (this.dvdlist.isValidRating(rating)) {
+				break;
+			}
 		}
 		// Add or modify the DVD (assuming the rating and time are valid
 		dvdlist.addOrModifyDVD(title, rating, time);
@@ -182,6 +209,8 @@ public class DVDGUITest implements DVDUserInterface{
 		// going back to DVD details page
 		showDVDDetail(dvdIndex);
 	}
+	
+	
 	
 	private void modifyDVDRunningTime(int dvdIndex) {
 		String title = this.dvdlist.getDVDByIndex(dvdIndex).getTitle();
@@ -191,11 +220,12 @@ public class DVDGUITest implements DVDUserInterface{
 		while (true) {
 			time = JOptionPane.showInputDialog("Enter Running Time for " + title);
 			if (time == null || rating.equals("")) {
-				continue;		// dialog was cancelled
+				return;		// dialog was cancelled
 			}
-			break;
 			// check if it's correct time.
-			// codes here
+			if (this.dvdlist.isValidTime(time)) {
+				break;
+			}
 		}
 		// Add or modify the DVD (assuming the rating and time are valid
 		dvdlist.addOrModifyDVD(title, rating, time);
@@ -204,32 +234,42 @@ public class DVDGUITest implements DVDUserInterface{
 		showDVDDetail(dvdIndex);
 	}
 	
+	
+	
 	private void doAddOrModifyDVD() {
-
+		String title, rating, time;
+		
 		// Request the title
-		String title = JOptionPane.showInputDialog("Enter title");
-		if (title == null) {
+		title = JOptionPane.showInputDialog("Enter title");
+		if (title == null || title.equals("")) {
 			return;		// dialog was cancelled
 		}
 		title = title.toUpperCase();
-
+		
 		// Request the rating
-		String rating = JOptionPane.showInputDialog("Enter rating for " + title);
-		if (rating == null) {
-			return;		// dialog was cancelled
-		}
-		rating = rating.toUpperCase();
+		do {
+			rating = JOptionPane.showInputDialog("Enter rating for " + title + " (G, PG, PG-13, NC-17 or R):");
+			if (rating == null) {
+				return;		// dialog was cancelled
+			}
+			rating = rating.toUpperCase();
+		} while (!this.dvdlist.isValidRating(rating)); // break when the rating is valid
 
 		// Request the running time
-		String time = JOptionPane.showInputDialog("Enter running time for " + title);
-		if (time == null) {
-		}
+		do {
+			time = JOptionPane.showInputDialog("Enter running time for " + title);
+			if (time == null || time.equals("")) {
+				return;
+			}
+		} while (!this.dvdlist.isValidTime(time)); // break when the time is valid
 
 		// Add or modify the DVD (assuming the rating and time are valid
 		dvdlist.addOrModifyDVD(title, rating, time);
 
 	}
 
+	
+	
 	private void doRemoveDVD() {
 
 		// Request the title
@@ -250,21 +290,30 @@ public class DVDGUITest implements DVDUserInterface{
 
 	}
 
+	
+	
 	private void doGetDVDsByRating() {
 
 		// Request the rating
-		String rating = JOptionPane.showInputDialog("Enter rating");
+		String rating = JOptionPane.showInputDialog("Enter rating (G, PG, PG-13, NC-17 or R):");
 		if (rating == null || rating.equals("")) {
 			return;		// dialog was cancelled
 		}
 		rating = rating.toUpperCase();
+		
+		String results = dvdlist.getDVDsByRating(rating);
+		if (results.equals("")) { // check if there's no DVD with this rating
+			results = "You don't have any DVDs with rating " + rating + ".";
+		} else {
+			results = "DVDs with rating " + rating + ": \n" + results;
+		}
 
-		String results = "DVDs with rating " + rating + ": \n";
-		results += dvdlist.getDVDsByRating(rating);
 		JOptionPane.showMessageDialog(null, results);
 
 	}
 
+	
+	
 	private void doGetTotalRunningTime() {
 
 		int total = dvdlist.getTotalRunningTime();
@@ -273,6 +322,8 @@ public class DVDGUITest implements DVDUserInterface{
 
 	}
 
+	
+	
 	private void doSave() {
 		
 		String results = "Successfully saved DVD collections to " + this.dvdlist.getFilename() + ".";

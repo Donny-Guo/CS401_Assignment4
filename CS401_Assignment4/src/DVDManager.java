@@ -13,7 +13,6 @@ public class DVDManager {
 		dlInterface = new DVDGUI(dl);
 		dlInterface.loadData();
 		dlInterface.processCommands();
-
 		
 	}
 
